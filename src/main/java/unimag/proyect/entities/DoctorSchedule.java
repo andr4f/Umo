@@ -3,8 +3,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalTime;
+import java.util.UUID;
 
 @Entity
+@Table(name = "doctor_schedule")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,12 +16,12 @@ public class DoctorSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_schedule")
-    private String id;
+    private UUID id;
 
     @Column(name = "week_day")
     private String weekDay;
 
-    @Column(name = "start_time")
+    @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
@@ -28,7 +30,7 @@ public class DoctorSchedule {
     @Builder.Default
     private String status = "ACTIVE";
 
-    @ManyToOne
-    @JoinColumn(name = "id_doctor")
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "id_doctor", nullable = false)
     private Doctor doctor;
 }

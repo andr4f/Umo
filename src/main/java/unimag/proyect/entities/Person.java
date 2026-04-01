@@ -1,6 +1,7 @@
 package unimag.proyect.entities;
 
-import jakarta.*;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import lombok.*;
@@ -17,9 +18,9 @@ import lombok.experimental.SuperBuilder;
 public class Person {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_person")
-    private Integer idPerson;
+    private UUID idPerson;
 
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
@@ -37,5 +38,6 @@ public class Person {
     private String phone;
 
     @Column(nullable = false, length = 20)
+    @Builder.Default
     private String status = "ACTIVE";
 }

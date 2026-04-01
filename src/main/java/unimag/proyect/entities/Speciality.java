@@ -2,6 +2,7 @@ package unimag.proyect.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Builder
@@ -13,9 +14,9 @@ import java.util.List;
 
 public class Speciality {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_speciality")
-    private Integer idSpeciality;
+    private UUID idSpeciality;
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;

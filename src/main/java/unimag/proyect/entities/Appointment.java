@@ -2,6 +2,7 @@ package unimag.proyect.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "appointment")
@@ -13,9 +14,9 @@ import java.time.LocalDateTime;
 public class Appointment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_appointment")
-    private Integer idAppointment;
+    private UUID idAppointment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_patient", nullable = false)

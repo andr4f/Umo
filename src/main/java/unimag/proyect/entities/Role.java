@@ -3,7 +3,7 @@ package unimag.proyect.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Builder
@@ -16,11 +16,8 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_role")
-    private String id;
+    private UUID id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
-
-    @OneToMany(mappedBy = "Role")
-    private List<SystemUser> systemuser; //evaluar si es necesario
 }

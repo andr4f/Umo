@@ -1,4 +1,6 @@
 package unimag.proyect.entities;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,9 +16,9 @@ import lombok.*;
 public class Office {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_office")
-    private Integer idOffice;
+    private UUID idOffice;
 
     @Column(nullable = false, unique = true, length = 20)
     private String code;

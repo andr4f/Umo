@@ -1,5 +1,8 @@
 package unimag.proyect.entities;
 
+import java.util.List;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,13 +16,17 @@ import lombok.*;
 public class AppointmentType {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_appointment_type")
-    private Integer idAppointmentType;
+    private UUID idAppointmentType;
 
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
     @Column(nullable = false)
-    private Integer duration;
+    private Integer duration; // duration in minutes
+
+    @OneToMany(mappedBy = "appointmentType")
+    private List<Appointment> appointments;
+
 }
