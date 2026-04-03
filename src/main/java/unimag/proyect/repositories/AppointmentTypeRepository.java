@@ -1,6 +1,8 @@
 package unimag.proyect.repositories;
 
 import unimag.proyect.entities.AppointmentType;
+import unimag.proyect.enums.AppointmentStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,5 +32,5 @@ public interface AppointmentTypeRepository extends JpaRepository<AppointmentType
                 AND a.status = :status
             )
             """)
-    List<AppointmentType> findTypesWithAppointmentsByStatus(@Param("status") String status);
+    List<AppointmentType> findTypesWithAppointmentsByStatus(@Param("status") AppointmentStatus status);
 }

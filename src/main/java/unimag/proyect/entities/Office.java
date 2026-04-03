@@ -3,9 +3,11 @@ import java.util.UUID;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import unimag.proyect.enums.OfficeStatus;
 
 @Entity
-@Builder
+@SuperBuilder
 @Table(name = "office")
 @Getter
 @Setter
@@ -29,7 +31,8 @@ public class Office {
     @Column(length = 100)
     private String location;
 
-    @Column(nullable = false, length = 20)
+   @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
-    private String status = "ACTIVE";
+    private OfficeStatus status = OfficeStatus.ACTIVE;
 }

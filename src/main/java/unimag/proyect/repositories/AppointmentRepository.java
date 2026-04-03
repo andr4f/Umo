@@ -1,6 +1,8 @@
 package unimag.proyect.repositories;
 
 import unimag.proyect.entities.Appointment;
+import unimag.proyect.enums.AppointmentStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +15,7 @@ import java.util.UUID;
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID> {
 
     // Query Methods
-    List<Appointment> findByStatus(String status);
+    List<Appointment> findByStatus(AppointmentStatus status);
     List<Appointment> findByPatient_IdPerson(UUID patientId);
     List<Appointment> findByDoctor_IdPerson(UUID doctorId);
     List<Appointment> findByOffice_IdOffice(UUID officeId);
@@ -46,7 +48,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     @Query("""
             SELECT COUNT(a) > 0 FROM Appointment a
             WHERE a.doctor.idPerson = :doctorId
-            AND a.status NOT IN ('CANCELLED', 'NO_SHOW')
+            AND a.status NOT IN (unimag.proyect.enums.AppointmentStatus.CANCELLED,
+                                unimag.proyect.enums.AppointmentStatus.NO_SHOW)
             AND a.startTime < :endTime
             AND a.endTime > :startTime
             """)
@@ -60,7 +63,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     @Query("""
             SELECT COUNT(a) > 0 FROM Appointment a
             WHERE a.office.idOffice = :officeId
-            AND a.status NOT IN ('CANCELLED', 'NO_SHOW')
+            AND a.status NOT IN (unimag.proyect.enums.AppointmentStatus.CANCELLED,
+                                unimag.proyect.enums.AppointmentStatus.NO_SHOW)
             AND a.startTime < :endTime
             AND a.endTime > :startTime
             """)

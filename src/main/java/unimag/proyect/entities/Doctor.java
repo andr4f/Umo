@@ -1,10 +1,13 @@
 package unimag.proyect.entities;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -27,6 +30,7 @@ public class Doctor extends Person {
     private Speciality speciality;
 
     @OneToMany(mappedBy = "doctor")
-    private List<DoctorSchedule> schedules;
+    @Builder.Default
+    private List<DoctorSchedule> schedules = new ArrayList<>();
 
 }
