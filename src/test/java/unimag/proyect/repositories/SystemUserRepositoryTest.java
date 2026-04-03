@@ -2,6 +2,8 @@ package unimag.proyect.repositories;
 
 import unimag.proyect.entities.Role;
 import unimag.proyect.entities.SystemUser;
+import unimag.proyect.enums.PersonStatus;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -132,4 +134,41 @@ class SystemUserRepositoryTest extends AbstractRepositoryIT {
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(u -> u.getRole().getName().equals("RECEPTIONIST"));
     }
+
+    @Test
+    @DisplayName("Encuentra usuarios por status")
+    void shouldFindByStatus() {
+        // Arrange
+        var role = savedRole("ADMIN");
+        savedSystemUser("activo1", "activo1@uni.edu", role);  // PersonStatus.ACTIVE por defecto
+        savedSystemUser("activo2", "activo2@uni.edu", role);
+
+        // Act
+        List<SystemUser> result = systemUserRepository.findByStatus(PersonStatus.ACTIVE);
+
+        // Assert
+        assertThat(result).hasSize(2);
+        assertThat(result).allMatch(u -> u.getStatus() == PersonStatus.ACTIVE);
+    }
+
+    @Test
+    @DisplayName("Retorna true si el email ya existe")
+    void shouldReturnTrueWhenEmailExists() {
+        // Arrange
+        var role = savedRole("ADMIN");
+        savedSystemUser("user.test", "test@uni.edu", role);
+
+        // Act & Assert
+        assertThat(systemUserRepository.existsByEmail("test@uni.edu")).isTrue();
+    }
+
+    @Test
+    @DisplayName("Retorna false si el email no existe")
+    void shouldReturnFalseWhenEmailNotExists() {
+        // Arrange — BD vacía
+
+        // Act & Assert
+        assertThat(systemUserRepository.existsByEmail("noexiste@uni.edu")).isFalse();
+    }
+
 }

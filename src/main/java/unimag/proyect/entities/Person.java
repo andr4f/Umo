@@ -3,19 +3,18 @@ package unimag.proyect.entities;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import unimag.proyect.enums.Gender;
+import unimag.proyect.enums.PersonStatus;
 
 @Entity
 @Table(name = "person")
 @Inheritance(strategy = InheritanceType.JOINED)
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
 @SuperBuilder
-public class Person {
+public abstract class Person {   // ← solo esto cambia
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -37,7 +36,12 @@ public class Person {
     @Column(length = 20)
     private String phone;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
-    private String status = "ACTIVE";
+    private PersonStatus status = PersonStatus.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Gender gender;
 }

@@ -3,8 +3,6 @@ package unimag.proyect.repositories;
 import unimag.proyect.entities.Speciality;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +22,7 @@ public interface SpecialityRepository extends JpaRepository<Speciality, UUID> {
     @Query("""
             SELECT DISTINCT s FROM Speciality s
             JOIN s.doctors d
-            WHERE d.status = 'ACTIVE'
+            WHERE d.status = unimag.proyect.enums.PersonStatus.ACTIVE
             """)
     List<Speciality> findSpecialitiesWithActiveDoctors();
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import unimag.proyect.enums.PersonStatus;
 
 public interface SystemUserRepository extends JpaRepository<SystemUser, UUID> {
 
@@ -15,7 +16,7 @@ public interface SystemUserRepository extends JpaRepository<SystemUser, UUID> {
     Optional<SystemUser> findByUsername(String username);
     Optional<SystemUser> findByEmail(String email);
     List<SystemUser> findByRole_Name(String roleName);
-    List<SystemUser> findByStatus(String status);
+    List<SystemUser> findByStatus(PersonStatus status);
 
     // Verificar si ya existe un username (para validar en registro)
     boolean existsByUsername(String username);

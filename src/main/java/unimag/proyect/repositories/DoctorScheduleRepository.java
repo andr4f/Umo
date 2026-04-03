@@ -4,32 +4,33 @@ import unimag.proyect.entities.DoctorSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import unimag.proyect.enums.ScheduleStatus;
+import unimag.proyect.enums.WeekDay;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, UUID> {
 
     // Query Methods
     List<DoctorSchedule> findByDoctor_IdPerson(UUID doctorId);
-    List<DoctorSchedule> findByWeekDay(String weekDay);
-    List<DoctorSchedule> findByStatus(String status);
-    List<DoctorSchedule> findByDoctor_IdPersonAndWeekDay(UUID doctorId, String weekDay);
+    List<DoctorSchedule> findByWeekDay(WeekDay weekDay);
+    List<DoctorSchedule> findByStatus(ScheduleStatus status);
+    List<DoctorSchedule> findByDoctor_IdPersonAndWeekDay(UUID doctorId, WeekDay weekDay);
 
     // Verificar si un doctor ya tiene horario en ese día y hora (evita duplicados)
     @Query("""
             SELECT COUNT(s) > 0 FROM DoctorSchedule s
             WHERE s.doctor.idPerson = :doctorId
             AND s.weekDay = :weekDay
-            AND s.status = 'ACTIVE'
+            AND s.status = unimag.proyect.enums.ScheduleStatus.AVAILABLE
             AND s.startTime < :endTime
             AND s.endTime > :startTime
             """)
     boolean existsScheduleConflict(
             @Param("doctorId") UUID doctorId,
-            @Param("weekDay") String weekDay,
+            @Param("weekDay")  WeekDay weekDay,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime
     );
@@ -38,7 +39,7 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
     @Query("""
             SELECT s FROM DoctorSchedule s
             WHERE s.doctor.idPerson = :doctorId
-            AND s.status = 'ACTIVE'
+            AND s.status = unimag.proyect.enums.ScheduleStatus.AVAILABLE
             ORDER BY s.weekDay ASC, s.startTime ASC
             """)
     List<DoctorSchedule> findActiveSchedulesByDoctor(@Param("doctorId") UUID doctorId);
@@ -48,7 +49,7 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
             SELECT s FROM DoctorSchedule s
             JOIN FETCH s.doctor
             WHERE s.weekDay = :weekDay
-            AND s.status = 'ACTIVE'
+            AND s.status = unimag.proyect.enums.ScheduleStatus.AVAILABLE
             """)
-    List<DoctorSchedule> findActiveSchedulesByWeekDay(@Param("weekDay") String weekDay);
+    List<DoctorSchedule> findActiveSchedulesByWeekDay(@Param("weekDay") WeekDay weekDay);
 }

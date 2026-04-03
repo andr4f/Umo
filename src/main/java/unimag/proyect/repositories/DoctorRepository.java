@@ -1,6 +1,8 @@
 package unimag.proyect.repositories;
 
 import unimag.proyect.entities.Doctor;
+import unimag.proyect.enums.PersonStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import unimag.proyect.enums.WeekDay;
 
 public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
 
@@ -16,7 +19,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
     Optional<Doctor> findByEmail(String email);
     Optional<Doctor> findByRegisterNum(String registerNum);
     List<Doctor> findByFullNameContainingIgnoreCase(String name);
-    List<Doctor> findByStatus(String status);
+    List<Doctor> findByStatus(PersonStatus status);
     List<Doctor> findBySpeciality_Name(String specialityName);
 
     // Doctor con sus horarios cargados (evita N+1)
@@ -30,10 +33,10 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
             WHERE s.weekDay = :weekDay
             AND s.startTime <= :startTime
             AND s.endTime >= :endTime
-            AND s.status = 'ACTIVE'
+            AND s.status = unimag.proyect.enums.ScheduleStatus.AVAILABLE
             """)
     List<Doctor> findAvailableDoctors(
-            @Param("weekDay") String weekDay,
+            @Param("weekDay") WeekDay weekDay,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime
     );
