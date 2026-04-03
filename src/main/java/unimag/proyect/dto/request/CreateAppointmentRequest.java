@@ -1,36 +1,25 @@
 package unimag.proyect.dto.request;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateAppointmentRequest {
-    @NotNull(message = "Patient ID is required")
-    private UUID patientId;
+public record CreateAppointmentRequest(
+        @NotNull(message = "Patient ID is required")
+        UUID patientId,
 
-    @NotNull(message = "Doctor ID is required")
-    private UUID doctorId;
+        @NotNull(message = "Doctor ID is required")
+        UUID doctorId,
 
-    @NotNull(message = "Office ID is required")
-    private UUID officeId;
+        @NotNull(message = "Office ID is required")
+        UUID officeId,
 
-    @NotNull(message = "Appointment Type ID is required")
-    private UUID appointmentTypeId;
+        @NotNull(message = "Appointment type ID is required")
+        UUID appointmentTypeId,
 
-    @NotNull(message = "Start time is required")
-    private LocalDateTime startTime;
-
-    @NotNull(message = "End time is required")
-    private LocalDateTime endTime;
-
-    private String observations;
-}
+        @NotNull(message = "Start time is required")
+        @FutureOrPresent(message = "Appointment cannot be in the past")
+        LocalDateTime startTime
+) {}

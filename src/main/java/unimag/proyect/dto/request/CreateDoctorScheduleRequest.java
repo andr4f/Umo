@@ -1,29 +1,21 @@
 package unimag.proyect.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import unimag.proyect.enums.WeekDay;
 
 import java.time.LocalTime;
 import java.util.UUID;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateDoctorScheduleRequest {
-    @NotBlank(message = "Week day is required")
-    private String weekDay;
+public record CreateDoctorScheduleRequest(
+        @NotNull(message = "Doctor ID is required")
+        UUID doctorId,
 
-    @NotNull(message = "Start time is required")
-    private LocalTime startTime;
+        @NotNull(message = "Week day is required")
+        WeekDay weekDay,
 
-    @NotNull(message = "End time is required")
-    private LocalTime endTime;
+        @NotNull(message = "Start time is required")
+        LocalTime startTime,
 
-    @NotNull(message = "Doctor ID is required")
-    private UUID doctorId;
-}
+        @NotNull(message = "End time is required")
+        LocalTime endTime
+) {}

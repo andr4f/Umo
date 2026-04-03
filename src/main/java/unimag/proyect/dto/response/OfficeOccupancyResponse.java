@@ -1,18 +1,13 @@
 package unimag.proyect.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 import java.util.UUID;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class OfficeOccupancyResponse {
-    private UUID officeId;
-    private String officeName;
-    private String currentStatus;
-    private int currentOccupancy;
-}
+public record OfficeOccupancyResponse(
+        UUID officeId,
+        String officeCode,
+        LocalDate date,
+        Integer totalSlots,
+        Integer occupiedSlots,
+        Double occupancyPercentage
+) {}

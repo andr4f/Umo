@@ -1,21 +1,16 @@
 package unimag.proyect.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import java.util.UUID;
+import unimag.proyect.enums.Gender;
+import unimag.proyect.enums.PersonStatus;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PatientResponse {
-    private UUID idPerson;
-    private String fullName;
-    private String documentType;
-    private String documentNumber;
-    private String email;
-    private String phone;
-    private String status;
-}
+public record PatientResponse(
+        UUID id,
+        String fullName,
+        String documentType,
+        String documentNumber,
+        String email,
+        String phone,
+        Gender gender,
+        PersonStatus status
+) {}

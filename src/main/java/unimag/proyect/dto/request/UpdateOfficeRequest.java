@@ -1,16 +1,15 @@
 package unimag.proyect.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import unimag.proyect.enums.OfficeStatus;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UpdateOfficeRequest {
-    private String name;
-    private String location;
-    private String status;
-}
+public record UpdateOfficeRequest(
+        @NotBlank(message = "Name is required")
+        String name,
+
+        String location,
+
+        @NotNull(message = "Status is required")
+        OfficeStatus status
+) {}

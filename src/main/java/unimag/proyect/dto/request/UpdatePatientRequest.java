@@ -1,20 +1,23 @@
 package unimag.proyect.dto.request;
 
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import unimag.proyect.enums.Gender;
+import unimag.proyect.enums.PersonStatus;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UpdatePatientRequest {
-    private String fullName;
-    
-    @Email(message = "Invalid email format")
-    private String email;
-    
-    private String phone;
-}
+public record UpdatePatientRequest(
+        @NotBlank(message = "Full name is required")
+        String fullName,
+
+        @NotBlank(message = "Email is required")
+        @Email(message = "Invalid email format")
+        String email,
+
+        String phone,
+
+        Gender gender,
+
+        @NotNull(message = "Status is required")
+        PersonStatus status
+) {}

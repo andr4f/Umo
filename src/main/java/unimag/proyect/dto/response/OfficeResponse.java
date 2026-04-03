@@ -1,19 +1,12 @@
 package unimag.proyect.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import java.util.UUID;
+import unimag.proyect.enums.OfficeStatus;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class OfficeResponse {
-    private UUID idOffice;
-    private String code;
-    private String name;
-    private String location;
-    private String status;
-}
+public record OfficeResponse(
+        UUID id,
+        String code,
+        String name,
+        String location,
+        OfficeStatus status
+) {}
