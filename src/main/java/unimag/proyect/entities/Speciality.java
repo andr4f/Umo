@@ -1,10 +1,13 @@
 package unimag.proyect.entities;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Table(name = "speciality")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,5 +25,6 @@ public class Speciality {
     private String name;
 
     @OneToMany(mappedBy = "speciality")
-    private List<Doctor> doctors;
+    @Builder.Default
+    private List<Doctor> doctors = new ArrayList<>();
 }

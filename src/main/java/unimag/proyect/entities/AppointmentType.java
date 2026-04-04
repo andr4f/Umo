@@ -1,5 +1,6 @@
 package unimag.proyect.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +28,7 @@ public class AppointmentType {
     private Integer duration; // duration in minutes
 
     @OneToMany(mappedBy = "appointmentType")
-    private List<Appointment> appointments;
+    @Builder.Default
+    private List<Appointment> appointments = new ArrayList<>();
 
 }

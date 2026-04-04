@@ -2,7 +2,6 @@ package unimag.proyect.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import unimag.proyect.enums.ScheduleStatus;
 import unimag.proyect.enums.WeekDay;
 
@@ -11,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "doctor_schedule")
-@SuperBuilder          // ← cambiado de @Builder
+@Builder       // ← cambiado de @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

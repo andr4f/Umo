@@ -3,11 +3,10 @@ import java.util.UUID;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import unimag.proyect.enums.OfficeStatus;
 
 @Entity
-@SuperBuilder
+@Builder
 @Table(name = "office")
 @Getter
 @Setter

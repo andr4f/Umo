@@ -26,7 +26,7 @@ public class Doctor extends Person {
     private String registerNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn (name = "id_speciality", nullable = false, unique = true)
+    @JoinColumn (name = "id_speciality", nullable = false)
     private Speciality speciality;
 
     @OneToMany(mappedBy = "doctor")
