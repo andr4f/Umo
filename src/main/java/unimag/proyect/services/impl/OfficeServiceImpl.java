@@ -8,8 +8,10 @@ import unimag.proyect.api.dto.request.UpdateOfficeRequest;
 import unimag.proyect.api.dto.response.OfficeResponse;
 import unimag.proyect.entities.Office;
 import unimag.proyect.enums.OfficeStatus;
+import unimag.proyect.exceptions.BusinessException;
 import unimag.proyect.exceptions.ConflictException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
+import unimag.proyect.repositories.AppointmentRepository;
 import unimag.proyect.repositories.OfficeRepository;
 import unimag.proyect.services.OfficeService;
 import unimag.proyect.mappers.OfficeMapper;
@@ -24,6 +26,7 @@ public class OfficeServiceImpl implements OfficeService {
 
     private final OfficeRepository officeRepository;
     private final OfficeMapper officeMapper;
+    private final AppointmentRepository appointmentRepository;
 
     @Override
     public OfficeResponse create(CreateOfficeRequest request) {
@@ -49,6 +52,15 @@ public class OfficeServiceImpl implements OfficeService {
     public OfficeResponse update(UUID id, UpdateOfficeRequest request) {
         Office office = officeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Office", id));
+
+        // Validar antes de desactivar
+        if (request.status() == OfficeStatus.INACTIVE
+                && office.getStatus() == OfficeStatus.ACTIVE) {
+            if (appointmentRepository.existsActiveAppointmentsByOffice(id)) {
+                throw new BusinessException(
+                    "Cannot deactivate office with active appointments");
+            }
+        }
 
         officeMapper.updateEntity(office, request);
         Office saved = officeRepository.save(office);

@@ -14,10 +14,10 @@ import unimag.proyect.entities.*;
 import unimag.proyect.enums.*;
 import unimag.proyect.exceptions.BusinessException;
 import unimag.proyect.exceptions.ConflictException;
-import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.repositories.*;
 import unimag.proyect.services.impl.AppointmentServiceImpl;
 import unimag.proyect.mappers.AppointmentMapper;
+import unimag.proyect.mappers.WeekDayMapper;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -102,7 +104,7 @@ class AppointmentServiceImplTest {
 
         // Horario que definitivamente NO cubre el start (siempre 01:00-02:00 AM)
         DoctorSchedule schedule = new DoctorSchedule();
-        schedule.setWeekDay(toWeekDay(start.getDayOfWeek())); // día correcto
+        schedule.setWeekDay(WeekDayMapper.from(start.getDayOfWeek())); // día correcto
         schedule.setStartTime(LocalTime.of(1, 0));
         schedule.setEndTime(LocalTime.of(2, 0));
 
@@ -250,8 +252,8 @@ class AppointmentServiceImplTest {
                 .thenReturn(false);
         when(appointmentRepository.existsOfficeConflict(eq(officeId), any(), any()))
                 .thenReturn(false);
-        when(appointmentRepository.findByPatient_IdPerson(patientId))
-                .thenReturn(Collections.emptyList());
+        when(appointmentRepository.existsPatientConflict(eq(patientId), any(), any()))
+                .thenReturn(false);
         when(appointmentMapper.toEntity(request)).thenReturn(mapped);
         when(appointmentMapper.toResponse(any())).thenReturn(mock(AppointmentResponse.class));
 

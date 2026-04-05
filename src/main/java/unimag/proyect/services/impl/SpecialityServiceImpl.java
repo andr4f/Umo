@@ -18,7 +18,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class SpecialtyServiceImpl implements SpecialityService {
+public class SpecialityServiceImpl implements SpecialityService {
 
     private final SpecialityRepository specialityRepository;
     private final SpecialityMapper specialityMapper;

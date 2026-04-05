@@ -17,10 +17,9 @@ import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.repositories.*;
 import unimag.proyect.services.AppointmentService;
 import unimag.proyect.mappers.AppointmentMapper;
+import unimag.proyect.mappers.WeekDayMapper;
 
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -68,17 +67,16 @@ public class AppointmentServiceImpl implements AppointmentService {
         LocalDateTime start = request.startTime();
         LocalDateTime end = start.plusMinutes(type.getDuration());
 
-        WeekDay weekDay = toWeekDay(start.getDayOfWeek());
+        WeekDay weekDay = WeekDayMapper.from(start.getDayOfWeek());
 
         List<DoctorSchedule> schedules =
                 doctorScheduleRepository.findByDoctor_IdPersonAndWeekDay(doctor.getIdPerson(), weekDay);
 
         boolean fitsSchedule = schedules.stream().anyMatch(s ->
-                !s.getStartTime().isAfter(end.toLocalTime())
-                        && !s.getEndTime().isBefore(start.toLocalTime())
-                        && !start.toLocalTime().isBefore(s.getStartTime())
-                        && !end.toLocalTime().isAfter(s.getEndTime())
+        !start.toLocalTime().isBefore(s.getStartTime())   // start >= schedule.start
+            && !end.toLocalTime().isAfter(s.getEndTime()) // end <= schedule.end
         );
+            
         if (!fitsSchedule) {
             throw new BusinessException("Appointment must be inside doctor's working hours");
         }
@@ -95,15 +93,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new ConflictException("Office already has an appointment in this time range");
         }
 
-        List<Appointment> patientAppointments =
-                appointmentRepository.findByPatient_IdPerson(patient.getIdPerson());
-        boolean patientConflict = patientAppointments.stream()
-                .filter(a -> a.getStatus() != AppointmentStatus.CANCELLED
-                        && a.getStatus() != AppointmentStatus.NO_SHOW)
-                .anyMatch(a -> overlaps(a.getStartTime(), a.getEndTime(), start, end));
-        if (patientConflict) {
-            throw new ConflictException("Patient already has an active appointment in this time range");
-        }
+        boolean patientConflict = appointmentRepository.existsPatientConflict(
+            patient.getIdPerson(), start, end);
+                if (patientConflict) {
+                    throw new ConflictException("Patient already has an active appointment in this time range");
+                }
 
         Appointment appointment = appointmentMapper.toEntity(request);
         appointment.setPatient(patient);
@@ -125,10 +119,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentMapper.toResponse(appointment);
     }
 
+    
+
+    // En AppointmentServiceImpl
     @Override
     @Transactional(readOnly = true)
     public List<AppointmentResponse> findAll() {
-        return appointmentRepository.findAll().stream()
+        return appointmentRepository.findAllWithDetails().stream()
                 .map(appointmentMapper::toResponse)
                 .toList();
     }
@@ -205,20 +202,4 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentMapper.toResponse(saved);
     }
 
-    private boolean overlaps(LocalDateTime start1, LocalDateTime end1,
-                             LocalDateTime start2, LocalDateTime end2) {
-        return start1.isBefore(end2) && end1.isAfter(start2);
-    }
-
-    private WeekDay toWeekDay(DayOfWeek dayOfWeek) {
-        return switch (dayOfWeek) {
-            case MONDAY -> WeekDay.MONDAY;
-            case TUESDAY -> WeekDay.TUESDAY;
-            case WEDNESDAY -> WeekDay.WEDNESDAY;
-            case THURSDAY -> WeekDay.THURSDAY;
-            case FRIDAY -> WeekDay.FRIDAY;
-            case SATURDAY -> WeekDay.SATURDAY;
-            case SUNDAY -> WeekDay.SUNDAY;
-        };
-    }
 }

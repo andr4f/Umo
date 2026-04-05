@@ -31,7 +31,29 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
             """)
     Optional<Appointment> findByIdWithDetails(@Param("id") UUID id);
 
-    // Citas de un doctor en un rango de fechas
+// En AppointmentRepository
+        @Query("SELECT a FROM Appointment a " +
+                "LEFT JOIN FETCH a.patient " +
+                "LEFT JOIN FETCH a.doctor " +
+                "LEFT JOIN FETCH a.office " +
+                "LEFT JOIN FETCH a.appointmentType")
+                List<Appointment> findAllWithDetails();
+
+            // En AppointmentRepository
+        @Query("SELECT COUNT(a) > 0 FROM Appointment a " +
+        "WHERE a.patient.idPerson = :patientId " +
+        "AND a.status NOT IN ('CANCELLED', 'NO_SHOW') " +
+        "AND a.startTime < :end AND a.endTime > :start")
+        boolean existsPatientConflict(@Param("patientId") UUID patientId,
+                                @Param("start") LocalDateTime start,
+                                @Param("end") LocalDateTime end);
+        // En AppointmentRepository
+        @Query("SELECT COUNT(a) > 0 FROM Appointment a " +
+        "WHERE a.office.idOffice = :officeId " +
+        "AND a.status IN ('SCHEDULED', 'CONFIRMED')")
+        boolean existsActiveAppointmentsByOffice(@Param("officeId") UUID officeId);
+        // Citas de un doctor en un rango de fechas
+        
     @Query("""
             SELECT a FROM Appointment a
             WHERE a.doctor.idPerson = :doctorId
@@ -81,4 +103,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
             ORDER BY a.startTime DESC
             """)
     List<Appointment> findPatientHistory(@Param("patientId") UUID patientId);
+
+    
 }
