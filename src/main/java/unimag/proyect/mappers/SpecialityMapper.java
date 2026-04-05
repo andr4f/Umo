@@ -1,4 +1,4 @@
-package unimag.proyect.services.mappers;
+package unimag.proyect.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

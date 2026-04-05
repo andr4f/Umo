@@ -1,4 +1,4 @@
-package unimag.proyect.services.mappers;
+package unimag.proyect.mappers;
 
 import org.mapstruct.*;
 import unimag.proyect.api.dto.request.CreateSystemUserRequest;

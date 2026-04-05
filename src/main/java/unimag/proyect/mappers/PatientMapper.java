@@ -1,4 +1,4 @@
-package unimag.proyect.services.mappers;
+package unimag.proyect.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,7 +19,7 @@ public interface PatientMapper {
 
    @Mapping(source = "idPerson", target = "id")
     PatientResponse toResponse(Patient patient);
-    // fullName, documentType, documentNumber, email,
+    // fullName, documentType, doQcumentNumber, email,
     // phone, gender, status → automáticos ✅
 
     // PUT: Actualizar Entidad existente con datos del DTO
