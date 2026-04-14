@@ -6,6 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import unimag.proyect.api.dto.request.CreatePatientRequest;
 import unimag.proyect.api.dto.request.UpdatePatientRequest;
 import unimag.proyect.api.dto.response.PatientResponse;
@@ -37,7 +43,9 @@ class PatientServiceImplTest {
 
     private UUID      patientId;
     private Patient   patient;
+    private Patient p2;
     private PatientResponse response;
+    private PatientResponse r2;
 
     @BeforeEach
     void setUp() {
@@ -51,15 +59,37 @@ class PatientServiceImplTest {
         patient.setStatus(PersonStatus.ACTIVE);
 
         response = new PatientResponse(
-        patientId,
-        "Juan Pérez",
-        "CC",
-        "123456789",
-        "juan@unimag.edu",
-        "3001234567",
-        Gender.MALE
-    );
-        }
+            patientId,
+            "Juan Pérez",
+            "CC",
+            "123456789",
+            "juan@unimag.edu",
+            "3001234567",
+            Gender.MALE,
+            PersonStatus.ACTIVE
+        );
+
+        // p2
+        UUID p2Id = UUID.randomUUID();
+        p2 = new Patient();
+        p2.setIdPerson(p2Id);
+        p2.setFullName("Ana López");
+        p2.setEmail("ana@unimag.edu");
+        p2.setDocumentNumber("987654321");
+        p2.setStatus(PersonStatus.ACTIVE);
+
+        // r2
+        r2 = new PatientResponse(
+            p2Id,
+            "Ana López",
+            "TI",
+            "987654321",
+            "ana@unimag.edu",
+            "3019876543",
+            Gender.FEMALE,
+            PersonStatus.ACTIVE
+        );
+    }
 
     // ─── create ──────────────────────────────────────────────────────────────
 
@@ -160,37 +190,33 @@ class PatientServiceImplTest {
     }
 
     // ─── findAll ─────────────────────────────────────────────────────────────
- @Test
-    void findAll_shouldReturnMappedList() {
-        Patient p2 = new Patient();
-        p2.setIdPerson(UUID.randomUUID());
-        PatientResponse r2 = new PatientResponse(
-        p2.getIdPerson(),
-        "Ana López",
-        "TI",
-        "987654321",
-        "ana@unimag.edu",
-        "3019876543",
-        Gender.FEMALE
-    );
-        when(patientRepository.findAll()).thenReturn(List.of(patient, p2));
+    @Test
+    void findAll_shouldReturnPageOfPatients() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("idPerson").ascending());
+        Page<Patient> patientPage = new PageImpl<>(List.of(patient, p2));
+
+        when(patientRepository.findAll(pageable)).thenReturn(patientPage);
         when(patientMapper.toResponse(patient)).thenReturn(response);
         when(patientMapper.toResponse(p2)).thenReturn(r2);
 
-        List<PatientResponse> result = patientService.findAll();
+        Page<PatientResponse> result = patientService.findAll(pageable);
 
-        assertThat(result).hasSize(2).containsExactly(response, r2);
+        assertThat(result.getContent()).hasSize(2).containsExactly(response, r2);
         verify(patientMapper, times(2)).toResponse(any(Patient.class));
     }
 
     @Test
-    void findAll_shouldReturnEmptyList_whenNoPatients() {
-        when(patientRepository.findAll()).thenReturn(List.of());
+    void findAll_shouldReturnEmptyPage_whenNoPatients() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Patient> emptyPage = new PageImpl<>(List.of());
 
-        assertThat(patientService.findAll()).isEmpty();
+        when(patientRepository.findAll(pageable)).thenReturn(emptyPage);
+
+        Page<PatientResponse> result = patientService.findAll(pageable);
+
+        assertThat(result.getContent()).isEmpty();
         verifyNoInteractions(patientMapper);
     }
-
     // ─── update ──────────────────────────────────────────────────────────────
 
     @Test

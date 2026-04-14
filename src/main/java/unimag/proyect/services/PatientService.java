@@ -4,8 +4,10 @@ import unimag.proyect.api.dto.request.CreatePatientRequest;
 import unimag.proyect.api.dto.request.UpdatePatientRequest;
 import unimag.proyect.api.dto.response.PatientResponse;
 
-import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PatientService {
 
@@ -13,7 +15,7 @@ public interface PatientService {
 
     PatientResponse findById(UUID id);
 
-    List<PatientResponse> findAll();
+    Page<PatientResponse> findAll(Pageable pageable);
 
     PatientResponse update(UUID id, UpdatePatientRequest request);
 }

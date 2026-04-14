@@ -1,6 +1,9 @@
 package unimag.proyect.services.impl;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import unimag.proyect.api.dto.request.CreateDoctorRequest;
@@ -57,10 +60,8 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DoctorResponse> findAll() {
-        return doctorRepository.findByStatus(PersonStatus.ACTIVE).stream()
-                .map(doctorMapper::toResponse)
-                .toList();
+    public Page<DoctorResponse> findAll(Pageable pageable) {
+        return doctorRepository.findAll(pageable).map(doctorMapper::toResponse);
     }
 
     @Override

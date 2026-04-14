@@ -1,8 +1,10 @@
 package unimag.proyect.mappers;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import unimag.proyect.api.dto.request.CreatePatientRequest;
 import unimag.proyect.api.dto.request.UpdatePatientRequest;
@@ -22,7 +24,8 @@ public interface PatientMapper {
     // fullName, documentType, doQcumentNumber, email,
     // phone, gender, status → automáticos ✅
 
-    // PUT: Actualizar Entidad existente con datos del DTO
+    // PATCH: Actualizar Entidad existente con datos del DTO
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "idPerson", ignore = true)
     @Mapping(target = "appointments", ignore = true)
     @Mapping(target = "status", ignore = true)

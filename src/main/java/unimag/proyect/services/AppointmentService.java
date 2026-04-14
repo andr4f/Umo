@@ -7,6 +7,9 @@ import unimag.proyect.api.dto.response.AppointmentResponse;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface AppointmentService {
 
     /**
@@ -22,7 +25,7 @@ public interface AppointmentService {
 
     AppointmentResponse findById(UUID id);
 
-    List<AppointmentResponse> findAll();
+    Page<AppointmentResponse> findAll(Pageable pageable);
 
     /**
      * SCHEDULED -> CONFIRMED

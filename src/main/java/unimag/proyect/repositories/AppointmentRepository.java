@@ -3,6 +3,9 @@ package unimag.proyect.repositories;
 import unimag.proyect.entities.Appointment;
 import unimag.proyect.enums.AppointmentStatus;
 
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,7 +40,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
                 "LEFT JOIN FETCH a.doctor " +
                 "LEFT JOIN FETCH a.office " +
                 "LEFT JOIN FETCH a.appointmentType")
-                List<Appointment> findAllWithDetails();
+                Page<Appointment> findAllWithDetails(Pageable pageable);
 
             // En AppointmentRepository
         @Query("SELECT COUNT(a) > 0 FROM Appointment a " +

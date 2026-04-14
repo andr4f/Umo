@@ -1,6 +1,9 @@
 package unimag.proyect.services.impl;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import unimag.proyect.api.dto.request.CancelAppointmentRequest;
@@ -122,12 +125,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     
 
     // En AppointmentServiceImpl
-    @Override
+        @Override
     @Transactional(readOnly = true)
-    public List<AppointmentResponse> findAll() {
-        return appointmentRepository.findAllWithDetails().stream()
-                .map(appointmentMapper::toResponse)
-                .toList();
+    public Page<AppointmentResponse> findAll(Pageable pageable) {
+        return appointmentRepository.findAllWithDetails(pageable)
+                .map(appointmentMapper::toResponse);
     }
 
     @Override

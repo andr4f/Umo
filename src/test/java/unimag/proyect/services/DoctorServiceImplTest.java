@@ -6,6 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import unimag.proyect.api.dto.request.CreateDoctorRequest;
 import unimag.proyect.api.dto.request.UpdateDoctorRequest;
 import unimag.proyect.api.dto.response.DoctorResponse;
@@ -220,8 +225,9 @@ class DoctorServiceImplTest {
         verifyNoInteractions(doctorMapper);
     }
 
-    @Test
-    void findAll_shouldReturnOnlyActiveDoctorsMapped() {
+        @Test
+        void findAll_shouldReturnPageOfDoctors() {
+        // Arrange — segundo doctor
         Doctor doctor2 = new Doctor();
         UUID doctor2Id = UUID.randomUUID();
         doctor2.setIdPerson(doctor2Id);
@@ -242,30 +248,37 @@ class DoctorServiceImplTest {
                 PersonStatus.ACTIVE
         );
 
-        when(doctorRepository.findByStatus(PersonStatus.ACTIVE))
-                .thenReturn(List.of(doctor, doctor2));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Doctor> doctorPage = new PageImpl<>(List.of(doctor, doctor2));
+
+        // Act
+        when(doctorRepository.findAll(pageable)).thenReturn(doctorPage);
         when(doctorMapper.toResponse(doctor)).thenReturn(response);
         when(doctorMapper.toResponse(doctor2)).thenReturn(response2);
 
-        List<DoctorResponse> result = doctorService.findAll();
+        Page<DoctorResponse> result = doctorService.findAll(pageable);
 
-        assertThat(result).hasSize(2).containsExactly(response, response2);
-        verify(doctorRepository).findByStatus(PersonStatus.ACTIVE);
+        // Assert
+        assertThat(result.getContent()).hasSize(2).containsExactly(response, response2);
+        verify(doctorRepository).findAll(pageable);
         verify(doctorMapper, times(2)).toResponse(any(Doctor.class));
-    }
+        }
 
-    @Test
-    void findAll_shouldReturnEmptyList_whenNoActiveDoctors() {
-        when(doctorRepository.findByStatus(PersonStatus.ACTIVE))
-                .thenReturn(List.of());
+        @Test
+        void findAll_shouldReturnEmptyPage_whenNoDoctors() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Doctor> emptyPage = new PageImpl<>(List.of());
 
-        List<DoctorResponse> result = doctorService.findAll();
+        // Act
+        when(doctorRepository.findAll(pageable)).thenReturn(emptyPage);
+        Page<DoctorResponse> result = doctorService.findAll(pageable);
 
-        assertThat(result).isEmpty();
-        verify(doctorRepository).findByStatus(PersonStatus.ACTIVE);
+        // Assert
+        assertThat(result.getContent()).isEmpty();
+        verify(doctorRepository).findAll(pageable);
         verifyNoInteractions(doctorMapper);
-    }
-
+        }
     @Test
     void update_shouldMutateSaveAndReturn_whenValid() {
         UpdateDoctorRequest request = new UpdateDoctorRequest(

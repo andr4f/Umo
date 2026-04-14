@@ -2,6 +2,7 @@ package unimag.proyect.api.dto.response;
 
 import java.util.UUID;
 import unimag.proyect.enums.Gender;
+import unimag.proyect.enums.PersonStatus;
 
 public record PatientResponse(
         UUID id,
@@ -10,5 +11,6 @@ public record PatientResponse(
         String documentNumber,
         String email,
         String phone,
-        Gender gender
+        Gender gender,
+        PersonStatus status
 ) {}
