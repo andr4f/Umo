@@ -5,6 +5,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import unimag.proyect.api.dto.request.CreateSystemUserRequest;
 import unimag.proyect.api.dto.request.UpdateSystemUserRequest;
@@ -39,14 +44,18 @@ class SystemUserServiceImplTest {
     private SystemUserServiceImpl systemUserService;
 
     private UUID userId;
+    private UUID userId2;
     private UUID roleId;
     private Role role;
     private SystemUser user;
+    private SystemUser user2;
+    private SystemUserResponse response2;
     private SystemUserResponse response;
 
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
+        userId2 = UUID.randomUUID();
         roleId = UUID.randomUUID();
 
         role = new Role(roleId, "ADMIN");
@@ -58,7 +67,15 @@ class SystemUserServiceImplTest {
         user.setRole(role);
         user.setStatus(PersonStatus.ACTIVE);
 
+        user2 = new SystemUser();
+        user2.setIdPerson(userId2);
+        user2.setUsername("mperez");
+        user2.setEmail("mperez@unimag.edu");
+        user2.setRole(role);
+        user2.setStatus(PersonStatus.ACTIVE);
+
         response = new SystemUserResponse(userId, "John Doe", "jdoe", "ADMIN");
+        response2 = new SystemUserResponse(userId2, "Maria Perez","mperez", "ADMIN");
     }
 
     // ─── create ──────────────────────────────────────────────────────────────
@@ -174,12 +191,32 @@ class SystemUserServiceImplTest {
     // ─── findAll ─────────────────────────────────────────────────────────────
 
     @Test
-    void findAll_shouldReturnMappedList() {
-        when(systemUserRepository.findAll()).thenReturn(List.of(user));
-        when(systemUserMapper.toResponse(user)).thenReturn(response);
+        void findAll_shouldReturnPageOfSystemUsers() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("username").ascending());
+        Page<SystemUser> userPage = new PageImpl<>(List.of(user, user2));
 
-        assertThat(systemUserService.findAll()).containsExactly(response);
+        when(systemUserRepository.findAll(pageable)).thenReturn(userPage);
+        when(systemUserMapper.toResponse(user)).thenReturn(response);
+        when(systemUserMapper.toResponse(user2)).thenReturn(response2);
+
+        Page<SystemUserResponse> result = systemUserService.findAll(pageable);
+
+        assertThat(result.getContent()).hasSize(2).containsExactly(response, response2);
+        verify(systemUserMapper, times(2)).toResponse(any(SystemUser.class));
     }
+
+    @Test
+        void findAll_shouldReturnEmptyPage_whenNoSystemUsers() {
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<SystemUser> emptyPage = new PageImpl<>(List.of());
+
+            when(systemUserRepository.findAll(pageable)).thenReturn(emptyPage);
+
+            Page<SystemUserResponse> result = systemUserService.findAll(pageable);
+
+            assertThat(result.getContent()).isEmpty();
+            verifyNoInteractions(systemUserMapper);
+        }
 
     // ─── update ──────────────────────────────────────────────────────────────
 

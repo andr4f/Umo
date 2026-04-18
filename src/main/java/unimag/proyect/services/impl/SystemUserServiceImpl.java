@@ -1,6 +1,9 @@
 package unimag.proyect.services.impl;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,10 +64,8 @@ public class SystemUserServiceImpl implements SystemUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SystemUserResponse> findAll() {
-        return systemUserRepository.findAll().stream()
-                .map(systemUserMapper::toResponse)
-                .toList();
+    public Page<SystemUserResponse> findAll(Pageable pageable) {
+        return systemUserRepository.findAll(pageable).map(systemUserMapper::toResponse);
     }
 
     @Override
