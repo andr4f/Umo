@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import unimag.proyect.api.dto.request.CreateAppointmentTypeRequest;
 import unimag.proyect.api.dto.response.AppointmentTypeResponse;
 import unimag.proyect.entities.AppointmentType;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.repositories.AppointmentTypeRepository;
 import unimag.proyect.services.AppointmentTypeService;
@@ -26,7 +26,7 @@ public class AppointmentTypeServiceImpl implements AppointmentTypeService {
     @Override
     public AppointmentTypeResponse create(CreateAppointmentTypeRequest request) {
         if (appointmentTypeRepository.existsByName(request.name())) {
-            throw new ConflictException("Appointment type name already exists");
+            throw new DuplicateResourceException("name", request.name());
         }
 
         AppointmentType type = appointmentTypeMapper.toEntity(request);

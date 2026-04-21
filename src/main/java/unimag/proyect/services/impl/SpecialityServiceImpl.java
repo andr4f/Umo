@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import unimag.proyect.api.dto.request.CreateSpecialtyRequest;
 import unimag.proyect.api.dto.response.SpecialityResponse;
 import unimag.proyect.entities.Speciality;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.repositories.SpecialityRepository;
 import unimag.proyect.services.SpecialityService;
@@ -26,7 +26,7 @@ public class SpecialityServiceImpl implements SpecialityService {
     @Override
     public SpecialityResponse create(CreateSpecialtyRequest request) {
         if (specialityRepository.existsByName(request.name())) {
-            throw new ConflictException("Speciality name already exists");
+            throw new DuplicateResourceException("name", request.name());
         }
         Speciality speciality = specialityMapper.toEntity(request);
         Speciality saved = specialityRepository.save(speciality);

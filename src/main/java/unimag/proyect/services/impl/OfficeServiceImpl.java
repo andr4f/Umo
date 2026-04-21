@@ -9,7 +9,7 @@ import unimag.proyect.api.dto.response.OfficeResponse;
 import unimag.proyect.entities.Office;
 import unimag.proyect.enums.OfficeStatus;
 import unimag.proyect.exceptions.BusinessException;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.repositories.AppointmentRepository;
 import unimag.proyect.repositories.OfficeRepository;
@@ -31,7 +31,7 @@ public class OfficeServiceImpl implements OfficeService {
     @Override
     public OfficeResponse create(CreateOfficeRequest request) {
         if (officeRepository.existsByCode(request.code())) {
-            throw new ConflictException("Office code already exists");
+            throw new DuplicateResourceException("code", request.code());
         }
         Office office = officeMapper.toEntity(request);
         office.setStatus(OfficeStatus.ACTIVE);

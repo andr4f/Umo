@@ -13,7 +13,7 @@ import unimag.proyect.api.dto.response.SystemUserResponse;
 import unimag.proyect.entities.Role;
 import unimag.proyect.entities.SystemUser;
 import unimag.proyect.enums.PersonStatus;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.mappers.SystemUserMapper;
 import unimag.proyect.repositories.RoleRepository;
@@ -37,10 +37,10 @@ public class SystemUserServiceImpl implements SystemUserService {
     public SystemUserResponse create(CreateSystemUserRequest request) {
 
         if (systemUserRepository.existsByUsername(request.username())) {
-            throw new ConflictException("Username already exists");
+            throw new DuplicateResourceException("username", request.username());
         }
         if (systemUserRepository.existsByEmail(request.email())) {
-            throw new ConflictException("Email already exists");
+            throw new DuplicateResourceException("email", request.email());
         }
 
         Role role = roleRepository.findById(request.roleId())
@@ -84,7 +84,7 @@ public class SystemUserServiceImpl implements SystemUserService {
         // email puede cambiar — verificar que no lo use otro usuario
         if (!user.getEmail().equals(request.email())
                 && systemUserRepository.existsByEmail(request.email())) {
-            throw new ConflictException("Email already exists");
+            throw new DuplicateResourceException("email", request.email());
         }
 
         // rol puede cambiar — resolverlo

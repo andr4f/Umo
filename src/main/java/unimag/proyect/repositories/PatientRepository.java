@@ -16,6 +16,8 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
     // Query Methods — campos heredados de Person
     Optional<Patient> findByEmail(String email);
     Optional<Patient> findByDocumentNumber(String documentNumber);
+    boolean existsByEmail(String email);
+    boolean existsByDocumentNumber(String documentNumber);
     List<Patient> findByFullNameContainingIgnoreCase(String name);
     List<Patient> findByStatus(PersonStatus status);
 

@@ -12,7 +12,7 @@ import unimag.proyect.api.dto.response.DoctorResponse;
 import unimag.proyect.entities.Doctor;
 import unimag.proyect.entities.Speciality;
 import unimag.proyect.enums.PersonStatus;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.repositories.DoctorRepository;
 import unimag.proyect.repositories.SpecialityRepository;
@@ -34,10 +34,10 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public DoctorResponse create(CreateDoctorRequest request) {
         doctorRepository.findByEmail(request.email())
-                .ifPresent(d -> { throw new ConflictException("Email already in use"); });
+                .ifPresent(d -> { throw new DuplicateResourceException("email", request.email()); });
 
         doctorRepository.findByRegisterNum(request.registerNum())
-                .ifPresent(d -> { throw new ConflictException("Register number already in use"); });
+                .ifPresent(d -> { throw new DuplicateResourceException("registerNum", request.registerNum()); });
 
         Speciality speciality = specialityRepository.findById(request.specialityId())
                 .orElseThrow(() -> new ResourceNotFoundException("Speciality", request.specialityId()));
@@ -68,6 +68,16 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponse update(UUID id, UpdateDoctorRequest request) {
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor", id));
+
+        if (!doctor.getEmail().equals(request.email())
+                && doctorRepository.existsByEmail(request.email())) {
+            throw new DuplicateResourceException("email", request.email());
+        }
+
+        if (!doctor.getRegisterNum().equals(request.registerNum())
+                && doctorRepository.existsByRegisterNum(request.registerNum())) {
+            throw new DuplicateResourceException("registerNum", request.registerNum());
+        }
 
         Speciality speciality = specialityRepository.findById(request.specialityId())
                 .orElseThrow(() -> new ResourceNotFoundException("Speciality", request.specialityId()));

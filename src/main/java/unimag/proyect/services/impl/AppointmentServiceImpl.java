@@ -14,9 +14,11 @@ import unimag.proyect.enums.AppointmentStatus;
 import unimag.proyect.enums.OfficeStatus;
 import unimag.proyect.enums.PersonStatus;
 import unimag.proyect.enums.WeekDay;
-import unimag.proyect.exceptions.BusinessException;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.InactiveEntityException;
+import unimag.proyect.exceptions.InvalidDateRangeException;
+import unimag.proyect.exceptions.InvalidStateTransitionException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
+import unimag.proyect.exceptions.ScheduleConflictException;
 import unimag.proyect.repositories.*;
 import unimag.proyect.services.AppointmentService;
 import unimag.proyect.mappers.AppointmentMapper;
@@ -43,26 +45,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     public AppointmentResponse create(CreateAppointmentRequest request) {
         LocalDateTime now = LocalDateTime.now();
         if (request.startTime().isBefore(now)) {
-            throw new BusinessException("Appointment cannot be in the past");
+            throw new InvalidDateRangeException("Appointment cannot be in the past");
         }
 
-        Patient patient = patientRepository.findById(request.patientId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient", request.patientId()));
-        if (patient.getStatus() != PersonStatus.ACTIVE) {
-            throw new BusinessException("Patient must be ACTIVE");
-        }
-
-        Doctor doctor = doctorRepository.findById(request.doctorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor", request.doctorId()));
-        if (doctor.getStatus() != PersonStatus.ACTIVE) {
-            throw new BusinessException("Doctor must be ACTIVE");
-        }
-
-        Office office = officeRepository.findById(request.officeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Office", request.officeId()));
-        if (office.getStatus() != OfficeStatus.ACTIVE) {
-            throw new BusinessException("Office must be ACTIVE");
-        }
+        Patient patient = findActivePatient(request.patientId());
+        Doctor doctor = findActiveDoctor(request.doctorId());
+        Office office = findActiveOffice(request.officeId());
 
         AppointmentType type = appointmentTypeRepository.findById(request.appointmentTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException("AppointmentType", request.appointmentTypeId()));
@@ -76,31 +64,32 @@ public class AppointmentServiceImpl implements AppointmentService {
                 doctorScheduleRepository.findByDoctor_IdPersonAndWeekDay(doctor.getIdPerson(), weekDay);
 
         boolean fitsSchedule = schedules.stream().anyMatch(s ->
-        !start.toLocalTime().isBefore(s.getStartTime())   // start >= schedule.start
-            && !end.toLocalTime().isAfter(s.getEndTime()) // end <= schedule.end
+                !start.toLocalTime().isBefore(s.getStartTime())
+                        && !end.toLocalTime().isAfter(s.getEndTime())
         );
-            
+
         if (!fitsSchedule) {
-            throw new BusinessException("Appointment must be inside doctor's working hours");
+            throw new ScheduleConflictException("Doctor", "appointment is outside doctor's working hours");
         }
 
         boolean doctorConflict = appointmentRepository.existsDoctorConflict(
                 doctor.getIdPerson(), start, end);
         if (doctorConflict) {
-            throw new ConflictException("Doctor already has an appointment in this time range");
+            throw new ScheduleConflictException("Doctor", "already has an appointment in this time range");
         }
 
         boolean officeConflict = appointmentRepository.existsOfficeConflict(
                 office.getIdOffice(), start, end);
         if (officeConflict) {
-            throw new ConflictException("Office already has an appointment in this time range");
+            throw new ScheduleConflictException("Office", "already has an appointment in this time range");
         }
 
         boolean patientConflict = appointmentRepository.existsPatientConflict(
-            patient.getIdPerson(), start, end);
-                if (patientConflict) {
-                    throw new ConflictException("Patient already has an active appointment in this time range");
-                }
+                patient.getIdPerson(), start, end);
+        if (patientConflict) {
+            throw new ScheduleConflictException(
+                    "Patient", "already has an active appointment in this time range");
+        }
 
         Appointment appointment = appointmentMapper.toEntity(request);
         appointment.setPatient(patient);
@@ -122,10 +111,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentMapper.toResponse(appointment);
     }
 
-    
-
-    // En AppointmentServiceImpl
-        @Override
+    @Override
     @Transactional(readOnly = true)
     public Page<AppointmentResponse> findAll(Pageable pageable) {
         return appointmentRepository.findAllWithDetails(pageable)
@@ -138,7 +124,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", id));
 
         if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {
-            throw new BusinessException("Only SCHEDULED appointments can be confirmed");
+            throw new InvalidStateTransitionException("Appointment", appointment.getStatus().name(), "CONFIRMED");
         }
 
         appointment.setStatus(AppointmentStatus.CONFIRMED);
@@ -153,7 +139,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         if (appointment.getStatus() != AppointmentStatus.SCHEDULED
                 && appointment.getStatus() != AppointmentStatus.CONFIRMED) {
-            throw new BusinessException("Only SCHEDULED or CONFIRMED appointments can be cancelled");
+            throw new InvalidStateTransitionException("Appointment", appointment.getStatus().name(), "CANCELLED");
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
@@ -169,12 +155,12 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", id));
 
         if (appointment.getStatus() != AppointmentStatus.CONFIRMED) {
-            throw new BusinessException("Only CONFIRMED appointments can be completed");
+            throw new InvalidStateTransitionException("Appointment", appointment.getStatus().name(), "COMPLETED");
         }
 
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(appointment.getStartTime())) {
-            throw new BusinessException("Appointment cannot be completed before it starts");
+            throw new InvalidDateRangeException("Appointment cannot be completed before it starts");
         }
 
         appointment.setStatus(AppointmentStatus.COMPLETED);
@@ -190,12 +176,12 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", id));
 
         if (appointment.getStatus() != AppointmentStatus.CONFIRMED) {
-            throw new BusinessException("Only CONFIRMED appointments can be marked as NO_SHOW");
+            throw new InvalidStateTransitionException("Appointment", appointment.getStatus().name(), "NO_SHOW");
         }
 
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(appointment.getStartTime())) {
-            throw new BusinessException("Appointment cannot be marked NO_SHOW before it starts");
+            throw new InvalidDateRangeException("Appointment cannot be marked NO_SHOW before it starts");
         }
 
         appointment.setStatus(AppointmentStatus.NO_SHOW);
@@ -204,4 +190,30 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentMapper.toResponse(saved);
     }
 
+    private Patient findActivePatient(UUID id) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient", id));
+        if (patient.getStatus() != PersonStatus.ACTIVE) {
+            throw new InactiveEntityException("Patient", id);
+        }
+        return patient;
+    }
+
+    private Doctor findActiveDoctor(UUID id) {
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor", id));
+        if (doctor.getStatus() != PersonStatus.ACTIVE) {
+            throw new InactiveEntityException("Doctor", id);
+        }
+        return doctor;
+    }
+
+    private Office findActiveOffice(UUID id) {
+        Office office = officeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Office", id));
+        if (office.getStatus() != OfficeStatus.ACTIVE) {
+            throw new InactiveEntityException("Office", id);
+        }
+        return office;
+    }
 }

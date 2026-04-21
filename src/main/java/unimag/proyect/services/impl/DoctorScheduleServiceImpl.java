@@ -8,8 +8,8 @@ import unimag.proyect.api.dto.response.DoctorScheduleResponse;
 import unimag.proyect.entities.Doctor;
 import unimag.proyect.entities.DoctorSchedule;
 import unimag.proyect.enums.ScheduleStatus;
-import unimag.proyect.exceptions.BusinessException;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.InvalidDateRangeException;
+import unimag.proyect.exceptions.ScheduleConflictException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.repositories.DoctorRepository;
 import unimag.proyect.repositories.DoctorScheduleRepository;
@@ -33,7 +33,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
     public DoctorScheduleResponse create(UUID doctorId, CreateDoctorScheduleRequest request) {
         if (request.startTime().isAfter(request.endTime())
                 || request.startTime().equals(request.endTime())) {
-            throw new BusinessException("Schedule start time must be before end time");
+            throw new InvalidDateRangeException("Schedule start time must be before end time");
         }
 
         Doctor doctor = doctorRepository.findById(doctorId)
@@ -46,7 +46,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
                 request.endTime()
         );
         if (conflict) {
-            throw new ConflictException("Doctor already has schedule in this time range");
+            throw new ScheduleConflictException("Doctor", "already has a schedule in this time range");
         }
 
         DoctorSchedule schedule = doctorScheduleMapper.toEntity(request);

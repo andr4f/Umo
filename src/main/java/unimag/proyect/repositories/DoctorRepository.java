@@ -18,6 +18,8 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
     // Query Methods
     Optional<Doctor> findByEmail(String email);
     Optional<Doctor> findByRegisterNum(String registerNum);
+    boolean existsByEmail(String email);
+    boolean existsByRegisterNum(String registerNum);
     List<Doctor> findByFullNameContainingIgnoreCase(String name);
     List<Doctor> findByStatus(PersonStatus status);
     List<Doctor> findBySpeciality_Name(String specialityName);

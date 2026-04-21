@@ -11,8 +11,10 @@ import unimag.proyect.api.dto.request.UpdatePatientRequest;
 import unimag.proyect.api.dto.response.PatientResponse;
 import unimag.proyect.entities.Patient;
 import unimag.proyect.enums.PersonStatus;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.BusinessException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
+import unimag.proyect.repositories.AppointmentRepository;
 import unimag.proyect.repositories.PatientRepository;
 import unimag.proyect.services.PatientService;
 import unimag.proyect.mappers.PatientMapper;
@@ -26,15 +28,16 @@ import java.util.UUID;
 public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository patientRepository;
+    private final AppointmentRepository appointmentRepository;
     private final PatientMapper patientMapper;
 
     @Override
     public PatientResponse create(CreatePatientRequest request) {
         patientRepository.findByEmail(request.email())
-                .ifPresent(p -> { throw new ConflictException("Email already in use"); });
+                .ifPresent(p -> { throw new DuplicateResourceException("email", request.email()); });
 
         patientRepository.findByDocumentNumber(request.documentNumber())
-                .ifPresent(p -> { throw new ConflictException("Document number already in use"); });
+                .ifPresent(p -> { throw new DuplicateResourceException("documentNumber", request.documentNumber()); });
 
         Patient patient = patientMapper.toEntity(request);
         patient.setStatus(PersonStatus.ACTIVE);
@@ -62,7 +65,22 @@ public class PatientServiceImpl implements PatientService {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient", id));
 
+        if (request.email() != null
+                && !patient.getEmail().equals(request.email())
+                && patientRepository.existsByEmail(request.email())) {
+            throw new DuplicateResourceException("email", request.email());
+        }
+
+        if (patient.getStatus() == PersonStatus.ACTIVE
+                && request.status() == PersonStatus.INACTIVE
+                && appointmentRepository.existsActiveAppointmentsByPatient(id)) {
+            throw new BusinessException("Cannot deactivate patient with active appointments");
+        }
+
         patientMapper.updateEntity(patient, request);
+        if (request.status() != null) {
+            patient.setStatus(request.status());
+        }
         Patient saved = patientRepository.save(patient);
         return patientMapper.toResponse(saved);
     }

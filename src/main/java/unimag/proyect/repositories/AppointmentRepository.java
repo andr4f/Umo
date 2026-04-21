@@ -55,6 +55,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
         "WHERE a.office.idOffice = :officeId " +
         "AND a.status IN ('SCHEDULED', 'CONFIRMED')")
         boolean existsActiveAppointmentsByOffice(@Param("officeId") UUID officeId);
+    @Query("SELECT COUNT(a) > 0 FROM Appointment a " +
+        "WHERE a.doctor.idPerson = :doctorId " +
+        "AND a.status IN ('SCHEDULED', 'CONFIRMED')")
+    boolean existsActiveAppointmentsByDoctor(@Param("doctorId") UUID doctorId);
+    @Query("SELECT COUNT(a) > 0 FROM Appointment a " +
+        "WHERE a.patient.idPerson = :patientId " +
+        "AND a.status IN ('SCHEDULED', 'CONFIRMED')")
+    boolean existsActiveAppointmentsByPatient(@Param("patientId") UUID patientId);
         // Citas de un doctor en un rango de fechas
         
     @Query("""
