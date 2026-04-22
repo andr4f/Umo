@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import unimag.proyect.api.dto.request.CreateSpecialtyRequest;
 import unimag.proyect.api.dto.response.SpecialityResponse;
 import unimag.proyect.entities.Speciality;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.mappers.SpecialityMapper;
 import unimag.proyect.repositories.SpecialityRepository;
@@ -69,7 +69,7 @@ class SpecialityServiceImplTest {
         when(specialityRepository.existsByName("Psicología")).thenReturn(true);
 
         assertThatThrownBy(() -> specialityService.create(request))
-                .isInstanceOf(ConflictException.class);
+                .isInstanceOf(DuplicateResourceException.class);
 
         verify(specialityRepository, never()).save(any());
         verifyNoInteractions(specialityMapper);

@@ -12,7 +12,7 @@ import unimag.proyect.api.dto.response.OfficeResponse;
 import unimag.proyect.entities.Office;
 import unimag.proyect.enums.OfficeStatus;
 import unimag.proyect.exceptions.BusinessException;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.mappers.OfficeMapper;
 import unimag.proyect.repositories.AppointmentRepository;
@@ -97,7 +97,7 @@ class OfficeServiceImplTest {
         when(officeRepository.existsByCode("C-101")).thenReturn(true);
 
         assertThatThrownBy(() -> officeService.create(request))
-                .isInstanceOf(ConflictException.class);
+                .isInstanceOf(DuplicateResourceException.class);
 
         verify(officeRepository, never()).save(any());
         verifyNoInteractions(officeMapper);

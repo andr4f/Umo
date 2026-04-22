@@ -17,7 +17,7 @@ import unimag.proyect.api.dto.response.SystemUserResponse;
 import unimag.proyect.entities.Role;
 import unimag.proyect.entities.SystemUser;
 import unimag.proyect.enums.PersonStatus;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.mappers.SystemUserMapper;
 import unimag.proyect.repositories.RoleRepository;
@@ -112,7 +112,7 @@ class SystemUserServiceImplTest {
         when(systemUserRepository.existsByUsername("jdoe")).thenReturn(true);
 
         assertThatThrownBy(() -> systemUserService.create(request))
-                .isInstanceOf(ConflictException.class);
+                .isInstanceOf(DuplicateResourceException.class);
 
         verifyNoInteractions(roleRepository, systemUserMapper, passwordEncoder);
     }
@@ -128,7 +128,7 @@ class SystemUserServiceImplTest {
         when(systemUserRepository.existsByEmail("jdoe@unimag.edu")).thenReturn(true);
 
         assertThatThrownBy(() -> systemUserService.create(request))
-                .isInstanceOf(ConflictException.class);
+                .isInstanceOf(DuplicateResourceException.class);
 
         verifyNoInteractions(roleRepository, systemUserMapper, passwordEncoder);
     }
@@ -246,7 +246,7 @@ class SystemUserServiceImplTest {
         when(systemUserRepository.existsByEmail("other@unimag.edu")).thenReturn(true);
 
         assertThatThrownBy(() -> systemUserService.update(userId, request))
-                .isInstanceOf(ConflictException.class);
+                .isInstanceOf(DuplicateResourceException.class);
 
         verify(systemUserMapper, never()).updateEntity(any(), any());
         verifyNoInteractions(roleRepository);

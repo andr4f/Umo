@@ -13,8 +13,8 @@ import unimag.proyect.enums.Gender;
 import unimag.proyect.enums.PersonStatus;
 import unimag.proyect.enums.ScheduleStatus;
 import unimag.proyect.enums.WeekDay;
-import unimag.proyect.exceptions.BusinessException;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.InvalidDateRangeException;
+import unimag.proyect.exceptions.ScheduleConflictException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.repositories.DoctorRepository;
 import unimag.proyect.repositories.DoctorScheduleRepository;
@@ -54,7 +54,7 @@ class DoctorScheduleServiceImplTest {
         );
 
         assertThatThrownBy(() -> service.create(doctorId, request))
-                .isInstanceOf(BusinessException.class);
+                .isInstanceOf(InvalidDateRangeException.class);
     }
 
     @Test
@@ -96,7 +96,7 @@ class DoctorScheduleServiceImplTest {
         ).thenReturn(true);
 
         assertThatThrownBy(() -> service.create(doctorId, request))
-                .isInstanceOf(ConflictException.class)
+                .isInstanceOf(ScheduleConflictException.class)
                 .hasMessageContaining("schedule");
     }
 

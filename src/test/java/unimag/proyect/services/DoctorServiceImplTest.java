@@ -18,7 +18,7 @@ import unimag.proyect.entities.Doctor;
 import unimag.proyect.entities.Speciality;
 import unimag.proyect.enums.Gender;
 import unimag.proyect.enums.PersonStatus;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.mappers.DoctorMapper;
 import unimag.proyect.repositories.DoctorRepository;
@@ -144,7 +144,7 @@ class DoctorServiceImplTest {
                 .thenReturn(Optional.of(doctor));
 
         assertThatThrownBy(() -> doctorService.create(request))
-                .isInstanceOf(ConflictException.class);
+                .isInstanceOf(DuplicateResourceException.class);
 
         verify(doctorRepository, never()).findByRegisterNum(any());
         verifyNoInteractions(specialityRepository, doctorMapper);
@@ -170,7 +170,7 @@ class DoctorServiceImplTest {
                 .thenReturn(Optional.of(doctor));
 
         assertThatThrownBy(() -> doctorService.create(request))
-                .isInstanceOf(ConflictException.class);
+                .isInstanceOf(DuplicateResourceException.class);
 
         verifyNoInteractions(specialityRepository, doctorMapper);
         verify(doctorRepository, never()).save(any());

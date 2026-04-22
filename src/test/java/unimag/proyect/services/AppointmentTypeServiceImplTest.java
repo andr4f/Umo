@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import unimag.proyect.api.dto.request.CreateAppointmentTypeRequest;
 import unimag.proyect.api.dto.response.AppointmentTypeResponse;
 import unimag.proyect.entities.AppointmentType;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.DuplicateResourceException;
 import unimag.proyect.exceptions.ResourceNotFoundException;
 import unimag.proyect.mappers.AppointmentTypeMapper;
 import unimag.proyect.repositories.AppointmentTypeRepository;
@@ -86,7 +86,7 @@ class AppointmentTypeServiceImplTest {
         when(appointmentTypeRepository.existsByName("Consulta General")).thenReturn(true);
 
         assertThatThrownBy(() -> appointmentTypeService.create(request))
-                .isInstanceOf(ConflictException.class);
+                .isInstanceOf(DuplicateResourceException.class);
 
         verify(appointmentTypeRepository).existsByName("Consulta General");
         verify(appointmentTypeRepository, never()).save(any());

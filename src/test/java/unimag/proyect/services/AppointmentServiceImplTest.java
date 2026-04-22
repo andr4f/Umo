@@ -12,8 +12,9 @@ import unimag.proyect.api.dto.request.CreateAppointmentRequest;
 import unimag.proyect.api.dto.response.AppointmentResponse;
 import unimag.proyect.entities.*;
 import unimag.proyect.enums.*;
-import unimag.proyect.exceptions.BusinessException;
-import unimag.proyect.exceptions.ConflictException;
+import unimag.proyect.exceptions.InvalidDateRangeException;
+import unimag.proyect.exceptions.InvalidStateTransitionException;
+import unimag.proyect.exceptions.ScheduleConflictException;
 import unimag.proyect.repositories.*;
 import unimag.proyect.services.impl.AppointmentServiceImpl;
 import unimag.proyect.mappers.AppointmentMapper;
@@ -75,7 +76,7 @@ class AppointmentServiceImplTest {
         );
 
         assertThatThrownBy(() -> service.create(request))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(InvalidDateRangeException.class)
                 .hasMessageContaining("past");
     }
     @Test
@@ -118,8 +119,8 @@ class AppointmentServiceImplTest {
         // SIN stub de appointmentMapper.toEntity — la excepción ocurre antes
 
         assertThatThrownBy(() -> service.create(request))
-                .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("working hours");
+                .isInstanceOf(ScheduleConflictException.class)
+                .hasMessageContaining("outside doctor's working hours");
     }
 
     @Test
@@ -162,8 +163,9 @@ class AppointmentServiceImplTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() -> service.create(request))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("Doctor already has an appointment");
+                .isInstanceOf(ScheduleConflictException.class)
+                .hasMessageContaining("Doctor")
+                .hasMessageContaining("appointment");
     }
 
     @Test
@@ -207,8 +209,9 @@ class AppointmentServiceImplTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() -> service.create(request))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("Office already has an appointment");
+                .isInstanceOf(ScheduleConflictException.class)
+                .hasMessageContaining("Office")
+                .hasMessageContaining("appointment");
     }
 
     @Test
@@ -300,8 +303,8 @@ class AppointmentServiceImplTest {
         when(appointmentRepository.findById(id)).thenReturn(Optional.of(appointment));
 
         assertThatThrownBy(() -> service.cancel(id, new CancelAppointmentRequest("x")))
-                .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("cancelled");
+                .isInstanceOf(InvalidStateTransitionException.class)
+                .hasMessageContaining("COMPLETED");
     }
 
     @Test
@@ -333,7 +336,7 @@ class AppointmentServiceImplTest {
         when(appointmentRepository.findById(id)).thenReturn(Optional.of(appointment));
 
         assertThatThrownBy(() -> service.complete(id, null))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(InvalidDateRangeException.class)
                 .hasMessageContaining("before it starts");
     }
 
@@ -365,8 +368,8 @@ class AppointmentServiceImplTest {
         when(appointmentRepository.findById(id)).thenReturn(Optional.of(appointment));
 
         assertThatThrownBy(() -> service.markNoShow(id))
-                .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("CONFIRMED");
+                .isInstanceOf(InvalidStateTransitionException.class)
+                .hasMessageContaining("SCHEDULED");
     }
 // Pégalo al final de AppointmentServiceImplTest, antes del cierre de clase
 private WeekDay toWeekDay(DayOfWeek dayOfWeek) {
